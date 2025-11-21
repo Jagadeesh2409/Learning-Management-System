@@ -1,24 +1,26 @@
 const express = require('express')
-const socket = require('socket.io')
-const app = express()
 const http = require('http')
+const socketIo = require('socket.io')
+const app = express()
 const server = http.createServer(app)
+const io = new socketIo.Server(server)
+const PORT = process.env.PORT || 3000
+const errorHandler = require('./utils/errorHandler')
 
+require('./socket/index')(io)
 
-const io = new socket.Server(server,{
-    cors:{
-        origin:"*",
-        methods:['post','get']
-    }
+app.use(express.json())
+app.use(errorHandler)
+
+app.get('/', (req, res) => {
+    res.send('Hello World!')
 })
 
-app.io =io
-require('./socket/index.js')(io)
 
-app.get('/',(req,res)=>{
-    res.send('<h1>Server is Running</h1>')
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
 })
 
-server.listen(3000,()=>{
-    console.log('server is running')
-})
+
+
+
