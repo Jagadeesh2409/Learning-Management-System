@@ -13,7 +13,8 @@ const updateSocialMedia = async (req, res) => {
         }
         const profile = await db('users').select('*').where({ id: user_id });
         success(res, profile, response.SOCIAL_MEDIA_SAVED);
-    } catch (_) {
+    } catch (err) {
+        console.log(err);
         error(res, response.ISE);
     }
 }

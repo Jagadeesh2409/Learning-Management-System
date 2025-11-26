@@ -21,5 +21,20 @@ exports.seed = async function (knex) {
     { id: 11, permissions: 'admin_profile:delete', showname: true },
     { id: 12, permissions: 'admin_profile:create', showname: true },
 
+    { id: 13, permissions: 'course:read', showname: true },
+    { id: 14, permissions: 'course:update', showname: true },
+    { id: 15, permissions: 'course:delete', showname: true },
+    { id: 16, permissions: 'course:create', showname: true },
+
+    { id: 17, permissions: 'lesson:read', showname: true },
+    { id: 18, permissions: 'lesson:update', showname: true },
+    { id: 19, permissions: 'lesson:delete', showname: true },
+    { id: 20, permissions: 'lesson:create', showname: true },
+
+    { id: 21, permissions: 'quiz:read', showname: true },
+    { id: 22, permissions: 'quiz:update', showname: true },
+    { id: 23, permissions: 'quiz:delete', showname: true },
+    { id: 24, permissions: 'quiz:create', showname: true },
+
   ]);
 };

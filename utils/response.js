@@ -39,6 +39,25 @@ const response = {
     SOCIAL_MEDIA_UPDATED: "Social media updated",
     SOCIAL_MEDIA_FETCHED: "Social media fetched",
 
+    COURSE_SAVED: "Course saved",
+    COURSE_UPDATED: "Course updated",
+    COURSE_FETCHED: "Course fetched",
+    COURSE_DELETED: "Course deleted",
+
+    LESSON_SAVED: "Lesson saved",
+    LESSON_UPDATED: "Lesson updated",
+    LESSON_FETCHED: "Lesson fetched",
+    LESSON_DELETED: "Lesson deleted",
+
+    QUIZ_SAVED: "Quiz saved",
+    QUIZ_UPDATED: "Quiz updated",
+    QUIZ_FETCHED: "Quiz fetched",
+    QUIZ_DELETED: "Quiz deleted",
+
+    ASSIGNMENT_SAVED: "Assignment saved",
+    ASSIGNMENT_UPDATED: "Assignment updated",
+    ASSIGNMENT_FETCHED: "Assignment fetched",
+    ASSIGNMENT_DELETED: "Assignment deleted",
 }
 
 module.exports = {

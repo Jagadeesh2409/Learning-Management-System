@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Class Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .controls {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-grid {
+            flex: 3;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:disabled {
+            background: #ccc;
+        }
+
+        button.disconnect {
+            background: #dc3545;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Live Class Demo</h1>
+    <div class="container">
+        <div class="controls">
+            <h3>Connection Details</h3>
+
+            <label>LiveKit URL</label>
+            <input type="text" id="url" placeholder="wss://your-project.livekit.cloud">
+
+            <label>Room Name</label>
+            <input type="text" id="room" value="class-101">
+
+            <label>My Name</label>
+            <input type="text" id="name" value="Teacher">
+
+            <label>Role</label>
+            <select id="role">
+                <option value="teacher">Teacher (Publish Video/Audio)</option>
+                <option value="student">Student (View Only)</option>
+            </select>
+
+            <button id="connect-btn" onclick="connect()">Join Class</button>
+            <button id="disconnect-btn" onclick="disconnect()" class="disconnect" disabled>Leave Class</button>
+
+            <div id="status" class="status">Status: Disconnected</div>
+            <hr>
+            <small>Note: This demo fetches a token from your local backend (http://localhost:3000/live-class/token)
+                automatically.</small>
+        </div>
+
+        <div class="video-grid" id="video-container">
+            <!-- Videos will appear here -->
+        </div>
+    </div>
+
+    <script>
+        let room;
+
+        async function connect() {
+            const url = document.getElementById('url').value;
+            const roomName = document.getElementById('room').value;
+            const name = document.getElementById('name').value;
+            const role = document.getElementById('role').value;
+            const status = document.getElementById('status');
+            const connectBtn = document.getElementById('connect-btn');
+
+            if (!url) {
+                alert('Please enter LiveKit URL');
+                return;
+            }
+
+            status.innerText = 'Status: Getting Token...';
+            connectBtn.disabled = true;
+
+            try {
+                // 1. Get Token from Backend
+                const response = await fetch(`http://localhost:3000/live-class/token?room_name=${roomName}&user_identity=${name}&user_name=${name}&is_teacher=${role === 'teacher'}`);
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                // 2. Connect to LiveKit
+                status.innerText = 'Status: Connecting to LiveKit...';
+                room = new LivekitClient.Room();
+
+                room.on(LivekitClient.RoomEvent.TrackSubscribed, handleTrackSubscribed);
+                room.on(LivekitClient.RoomEvent.TrackUnsubscribed, handleTrackUnsubscribed);
+                room.on(LivekitClient.RoomEvent.Disconnected, () => {
+                    status.innerText = 'Status: Disconnected';
+                    document.getElementById('disconnect-btn').disabled = true;
+                    connectBtn.disabled = false;
+                    document.getElementById('video-container').innerHTML = '';
+                });
+
+                await room.connect(url, data.token);
+            }
+        }
+
+        function disconnect() {
+            if (room) room.disconnect();
+        }
+
+        function handleTrackSubscribed(track, publication, participant) {
+            if (track.kind === LivekitClient.Track.Kind.Video || track.kind === LivekitClient.Track.Kind.Audio) {
+                const element = track.attach();
+                element.id = 'track-' + publication.trackSid;
+                const wrapper = document.createElement('div');
+                wrapper.id = 'wrapper-' + publication.trackSid;
+                wrapper.innerHTML = `<p>${participant.identity}</p>`;
+                wrapper.appendChild(element);
+                document.getElementById('video-container').appendChild(wrapper);
+            }
+        }
+
+        function handleTrackUnsubscribed(track, publication, participant) {
+            track.detach();
+            const wrapper = document.getElementById('wrapper-' + publication.trackSid);
+            if (wrapper) wrapper.remove();
+        }
+    </script>
+</body>
+
+</html>

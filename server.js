@@ -13,23 +13,29 @@ const instructorRoute = require('./routes/instructorRoute')
 const adminRoute = require('./routes/adminRoute')
 const uploadRoute = require('./routes/uploadRoute')
 const socialmediaRoute = require('./routes/socialmediaRoute')
+const courseRoute = require('./routes/courseRoute')
+const videoStreamRoute = require('./routes/videoStreamRoute')
+const commonRoute = require('./routes/commonRoute')
 
 require('./socket/index')(io)
 
+const cors = require('cors')
+app.use(cors())
 app.use(express.json())
 
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
-
-
+app.use('/course', courseRoute)
 app.use('/auth', authRoute)
 app.use('/student', studentRoute)
 app.use('/instructor', instructorRoute)
 app.use('/admin', adminRoute)
 app.use('/upload', uploadRoute)
 app.use('/socialmedia', socialmediaRoute)
+app.use('/course', courseRoute)
+app.use('/video', videoStreamRoute)
+app.use('/live-class', require('./live-class/routes'))
+app.use('/', commonRoute)
+
 
 app.use(errorHandler)
 
