@@ -31,6 +31,9 @@ const response = {
     STUDENT_PROFILE_SAVED: "Student profile saved",
     INSTRUCTOR_PROFILE_SAVED: "Instructor profile saved",
     ADMIN_PROFILE_SAVED: "Admin profile saved",
+    ADMIN_PROFILE_FETCHED: "Admin profile fetched",
+    INSTRUCTOR_PROFILE_FETCHED: "Instructor profile fetched",
+    STUDENT_PROFILE_FETCHED: "Student profile fetched",
 
     PERMISSION_DENIED: "You do not have permission to access this resource",
     UPLOADED: "File uploaded successfully",
@@ -43,6 +46,8 @@ const response = {
     COURSE_UPDATED: "Course updated",
     COURSE_FETCHED: "Course fetched",
     COURSE_DELETED: "Course deleted",
+    COURSE_NOT_FOUND: "Course not found",
+    COURSE_ALREADY_ENROLLED: "Course already enrolled",
 
     LESSON_SAVED: "Lesson saved",
     LESSON_UPDATED: "Lesson updated",
@@ -53,11 +58,26 @@ const response = {
     QUIZ_UPDATED: "Quiz updated",
     QUIZ_FETCHED: "Quiz fetched",
     QUIZ_DELETED: "Quiz deleted",
+    QUIZ_NOT_FOUND: "Quiz not found",
 
     ASSIGNMENT_SAVED: "Assignment saved",
     ASSIGNMENT_UPDATED: "Assignment updated",
     ASSIGNMENT_FETCHED: "Assignment fetched",
     ASSIGNMENT_DELETED: "Assignment deleted",
+
+    PAYMENT_SAVED: "Payment saved",
+    PAYMENT_UPDATED: "Payment updated",
+    PAYMENT_FETCHED: "Payment fetched",
+    PAYMENT_DELETED: "Payment deleted",
+    PAYMENT_FAILED: "Payment failed",
+
+    LESSON_TITLE_EXISTS: "Lesson title already exists",
+    LESSON_NOT_FOUND: "Lesson not found",
+    LESSON_FETCHED: "Lesson fetched",
+    LESSON_DELETED: "Lesson deleted",
+    LESSON_UPDATED: "Lesson updated",
+    LESSON_SAVED: "Lesson saved",
+
 }
 
 module.exports = {

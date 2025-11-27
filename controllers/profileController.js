@@ -81,7 +81,14 @@ const updateAdminProfile = async (req, res) => {
 
 const getStudentProfile = async (req, res) => {
     try {
-        const profile = await db('users')
+        const user_id = req.user.id;
+        let profile;
+        const student = await db('students').where({ student_id: user_id }).first();
+        if (!student) {
+            profile = await db('users').select('id', 'name', 'email', 'phone').where({ id: user_id }).first();
+            return success(res, profile, response.STUDENT_PROFILE_FETCHED);
+        }
+        profile = await db('users')
             .join('students', 'users.id', 'students.student_id')
             .select(
                 'users.id',
@@ -92,7 +99,7 @@ const getStudentProfile = async (req, res) => {
                 'students.education',
                 'students.profile_image'
             )
-            .where('users.id', req.user.id)
+            .where('users.id', user_id)
             .first();
         success(res, profile, response.STUDENT_PROFILE_FETCHED);
     } catch (_) {
@@ -102,7 +109,14 @@ const getStudentProfile = async (req, res) => {
 
 const getInstructorProfile = async (req, res) => {
     try {
-        const profile = await db("users")
+        const user_id = req.user.id;
+        let profile;
+        const instructor = await db('instructors').where({ instructor_id: user_id }).first();
+        if (!instructor) {
+            profile = await db('users').select('id', 'name', 'email', 'phone').where({ id: user_id }).first();
+            return success(res, profile, response.INSTRUCTOR_PROFILE_FETCHED);
+        }
+        profile = await db("users")
             .join("instructors", "users.id", "instructors.instructor_id")
             .select(
                 "users.id",
@@ -111,9 +125,13 @@ const getInstructorProfile = async (req, res) => {
                 "instructors.age",
                 "instructors.DOB",
                 "instructors.education",
-                "instructors.profile_image"
+                "instructors.profile_image",
+                "instructors.resume",
+                "instructors.job_type",
+                "instructors.skills",
+                "instructors.experience",
             )
-            .where("users.id", req.user.id)
+            .where("users.id", user_id)
             .first();
         success(res, profile, response.INSTRUCTOR_PROFILE_FETCHED);
     } catch (err) {
@@ -125,10 +143,15 @@ const getInstructorProfile = async (req, res) => {
 const getAdminProfile = async (req, res) => {
     try {
         const user_id = req.user.id;
-
         console.log(user_id)
+        let profile;
+        const admin = await db('admins').where({ admin_id: user_id }).first();
+        if (!admin) {
+            profile = await db('users').select('id', 'name', 'email', 'phone').where({ id: user_id }).first();
+            return success(res, profile, response.ADMIN_PROFILE_FETCHED);
+        }
 
-        const profile = await db("users")
+        profile = await db("users")
             .join("admins", "users.id", "admins.admin_id")
             .select(
                 "users.id",

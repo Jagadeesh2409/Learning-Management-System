@@ -7,12 +7,13 @@ exports.up = function (knex) {
         table.string('age').notNullable()
         table.string('DOB').notNullable()
         table.string('gender').notNullable()
-        table.string('education').notNullable()
+        table.json('education').notNullable()
         table.string('profile_image')
         table.timestamp('created_at').defaultTo(knex.fn.now())
         table.timestamp('updated_at').defaultTo(knex.fn.now())
     })
 };
+
 
 exports.down = function (knex) {
     return knex.schema.dropTable('students')

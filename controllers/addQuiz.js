@@ -4,6 +4,7 @@ const { error, success, response } = require('../utils/response');
 const createQuiz = async (req, res) => {
     try {
         const data = req.body;
+        delete data.answer;
         const quiz = await db('quiz').insert(data);
         success(res, quiz, response.QUIZ_SAVED)
     } catch (err) {
@@ -34,7 +35,9 @@ const deleteQuiz = async (req, res) => {
 
 const getQuiz = async (req, res) => {
     try {
-        const quiz = await db('quiz').where('lesson_id', req.params.lesson_id).select('*');
+        const lesson_id = req.params.id;
+        console.log(lesson_id);
+        const quiz = await db('quiz').where({ lesson_id }).select('*');
         success(res, quiz, response.QUIZ_FETCHED)
     } catch (err) {
         console.error(err);
@@ -42,9 +45,14 @@ const getQuiz = async (req, res) => {
     }
 };
 
+
 const getSingleQuiz = async (req, res) => {
     try {
         const quiz = await db('quiz').where('id', req.params.id).select('*');
+
+        if (!quiz.length) {
+            return error(res, response.QUIZ_NOT_FOUND)
+        }
         success(res, quiz, response.QUIZ_FETCHED)
     } catch (err) {
         console.error(err);

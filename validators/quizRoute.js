@@ -8,9 +8,7 @@ const createQuizSchema = Joi.object({
     option3: Joi.string().required(),
     option4: Joi.string().required(),
     answer: Joi.string().required(),
-    marks: Joi.number().required(),
-    negative_marks: Joi.number().required(),
-    status: Joi.string().required(),
+    mark: Joi.number().required(),
 });
 
 const updateQuizSchema = Joi.object({
@@ -21,12 +19,11 @@ const updateQuizSchema = Joi.object({
     option3: Joi.string(),
     option4: Joi.string(),
     answer: Joi.string(),
-    marks: Joi.number(),
-    negative_marks: Joi.number(),
-    status: Joi.string(),
+    mark: Joi.number(),
 });
 
 module.exports = {
     createQuizSchema,
     updateQuizSchema
 }
+

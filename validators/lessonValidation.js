@@ -2,6 +2,7 @@ const joi = require("joi");
 
 const createLessonSchema = joi.object({
     course_id: joi.number().required(),
+    instructor_id: joi.number().required(),
     video: joi.string().required(),
     thumbnail: joi.string().required(),
     duration: joi.string().required(),
@@ -10,12 +11,13 @@ const createLessonSchema = joi.object({
     type: joi.string().required(),
     status: joi.string().required(),
     difficulty: joi.string().required(),
-    language: joi.string().required(),
     order: joi.number().required(),
+
 });
 
 const updateLessonSchema = joi.object({
     course_id: joi.number(),
+    instructor_id: joi.number(),
     video: joi.string(),
     thumbnail: joi.string(),
     duration: joi.string(),
@@ -24,7 +26,6 @@ const updateLessonSchema = joi.object({
     type: joi.string(),
     status: joi.string(),
     difficulty: joi.string(),
-    language: joi.string(),
     order: joi.number(),
 });
 

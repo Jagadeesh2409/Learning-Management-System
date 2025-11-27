@@ -1,15 +1,14 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> } 
- */
+
 exports.seed = async function (knex) {
-  // Deletes ALL existing entries
   await knex('role_permission').del()
   await knex('role_permission').insert([
     { role_id: 1, permission_id: 1, value: true },
     { role_id: 1, permission_id: 2, value: true },
     { role_id: 1, permission_id: 3, value: true },
     { role_id: 1, permission_id: 4, value: true },
+    { role_id: 1, permission_id: 25, value: true },
+    { role_id: 1, permission_id: 26, value: true },
+
 
     { role_id: 2, permission_id: 5, value: true },
     { role_id: 2, permission_id: 6, value: true },
@@ -36,15 +35,15 @@ exports.seed = async function (knex) {
     { role_id: 3, permission_id: 23, value: true },
     { role_id: 3, permission_id: 24, value: true },
 
-    { role_id: 4, permission_id: 21, value: true },
-    { role_id: 4, permission_id: 22, value: true },
-    { role_id: 4, permission_id: 23, value: true },
-    { role_id: 4, permission_id: 24, value: true },
+    { role_id: 2, permission_id: 21, value: true },
+    { role_id: 2, permission_id: 22, value: true },
+    { role_id: 2, permission_id: 23, value: true },
+    { role_id: 2, permission_id: 24, value: true },
 
-    { role_id: 5, permission_id: 21, value: true },
-    { role_id: 5, permission_id: 22, value: true },
-    { role_id: 5, permission_id: 23, value: true },
-    { role_id: 5, permission_id: 24, value: true },
+    { role_id: 2, permission_id: 21, value: true },
+    { role_id: 2, permission_id: 22, value: true },
+    { role_id: 2, permission_id: 23, value: true },
+    { role_id: 2, permission_id: 24, value: true },
   ]);
 };
 

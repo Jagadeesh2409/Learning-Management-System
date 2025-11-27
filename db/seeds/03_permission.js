@@ -36,5 +36,13 @@ exports.seed = async function (knex) {
     { id: 23, permissions: 'quiz:delete', showname: true },
     { id: 24, permissions: 'quiz:create', showname: true },
 
+    { id: 25, permissions: 'course:read-entroll', showname: true },
+
+    { id: 26, permissions: 'student-entroll', showname: true },
+
+
+
+
+
   ]);
 };
