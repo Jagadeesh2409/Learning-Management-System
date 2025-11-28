@@ -3,7 +3,7 @@ exports.up = function (knex) {
     return knex.schema.createTable('lesson', (table) => {
         table.increments('id').primary();
         table.integer('course_id').unsigned().references('id').inTable('course').onDelete('cascade');
-        table.integer('instructor_id').unsigned().references('instructor_id').inTable('course').onDelete('cascade');
+        table.integer('instructor_id').unsigned().references('id').inTable('users').onDelete('cascade');
         table.string('video').notNullable();
         table.string('thumbnail').notNullable();
         table.string('duration').notNullable();

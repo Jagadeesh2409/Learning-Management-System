@@ -4,7 +4,7 @@ const { error, response, success } = require('../utils/response');
 const createCourse = async (req, res) => {
     try {
         if (!req.body) {
-            return error(res, response.ROLE_NOT_FOUND)
+            return error(res, 'Invalid request body', 400)
         }
         const data = req.body;
         const instructor_id = req.user.id;
@@ -20,7 +20,7 @@ const createCourse = async (req, res) => {
 const updateCourse = async (req, res) => {
     try {
         if (!req.params.id) {
-            return error(res, response.ROLE_NOT_FOUND)
+            return error(res, 'Course id required', 400)
         }
         const data = req.body;
         const instructor_id = req.user.id;
@@ -34,7 +34,7 @@ const updateCourse = async (req, res) => {
 const deleteCourse = async (req, res) => {
     try {
         if (!req.params.id) {
-            return error(res, response.ROLE_NOT_FOUND)
+            return error(res, 'Course id required', 400)
         }
         const course = await db('course').where({ id: req.params.id }).del();
         success(res, course, response.COURSE_DELETED);
@@ -46,7 +46,7 @@ const deleteCourse = async (req, res) => {
 const getCourse = async (req, res) => {
     try {
         if (!req.params.id) {
-            return error(res, response.ROLE_NOT_FOUND)
+            return error(res, 'Course id required', 400)
         }
         const course = await db('course').where({ id: req.params.id }).first();
         if (!course) {

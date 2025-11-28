@@ -30,7 +30,7 @@ const roleMiddleware = (permissionKey) => {
                 .select("id")
                 .first();
 
-            if (!perm.id) {
+            if (!perm || !perm.id) {
                 return error(res, response.PERMISSION_DENIED, 401);
             }
 

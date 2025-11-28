@@ -6,29 +6,35 @@ const createPayment = async (req, res) => {
         const student_id = req.user.id;
         const data = req.body;
         data.student_id = student_id;
-        if (data.payment_status !== 'success' || data.payment_amount != data.payment_fee) {
+        const course = await db('course').where('id', data.course_id).first();
+        if (!course) {
+            return error(res, response.COURSE_NOT_FOUND, 404);
+        }
+
+        if (data.payment_status !== 'success' || Number(data.payment_amount) !== Number(course.price)) {
             return error(res, response.PAYMENT_FAILED)
         }
-        const payment = await db('payments').insert(data);
-        const course = await db('course').where('id', data.course_id).first();
-        course.valid_month = 3;
 
-        const enroll = await db('enrollments').insert({
+        const [paymentId] = await db('payments').insert(data);
+
+        const valid_month = course.valid_month || 3;
+
+        await db('enrollments').insert({
             student_id: student_id,
             course_id: data.course_id,
             status: 'active',
             enrolled_at: new Date(),
-            expired_at: new Date(new Date().setMonth(new Date().getMonth() + course.valid_month))
-        })
+            expired_at: new Date(new Date().setMonth(new Date().getMonth() + valid_month))
+        });
 
-
-        success(res, payment, response.PAYMENT_SAVED)
+        success(res, { id: paymentId }, response.PAYMENT_SAVED)
     } catch (err) {
         if (err.code === 'ER_DUP_ENTRY') {
             return error(res, response.COURSE_ALREADY_ENROLLED)
         }
 
-        error(res, err)
+        console.error(err)
+        error(res, response.ISE)
     }
 }
 

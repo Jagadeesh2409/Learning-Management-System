@@ -6,9 +6,9 @@ exports.up = function (knex) {
     return knex.schema
         .createTable('live_classes', function (table) {
             table.increments('id').primary();
-            table.integer('course_id').unsigned().notNullable();
+            table.integer('course_id').unsigned().notNullable().references('id').inTable('course').onDelete('cascade');
             table.string('room_name').notNullable().unique();
-            table.integer('teacher_id').unsigned().notNullable();
+            table.integer('teacher_id').unsigned().notNullable().references('id').inTable('users').onDelete('cascade');
             table.dateTime('start_time').notNullable();
             table.dateTime('end_time');
             table.enum('status', ['scheduled', 'active', 'completed']).defaultTo('scheduled');
@@ -20,7 +20,7 @@ exports.up = function (knex) {
         .createTable('live_attendance', function (table) {
             table.increments('id').primary();
             table.integer('live_class_id').unsigned().references('id').inTable('live_classes').onDelete('CASCADE');
-            table.integer('user_id').unsigned().notNullable();
+            table.integer('user_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
             table.dateTime('join_time').defaultTo(knex.fn.now());
             table.dateTime('leave_time');
             table.enum('status', ['joined', 'left']).defaultTo('joined');

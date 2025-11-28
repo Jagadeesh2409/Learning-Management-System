@@ -3,9 +3,13 @@ const { error, success, response } = require('../utils/response');
 
 const getQuiz = async (req, res) => {
     try {
-        const quiz = await db('quiz').where('lesson_id', req.params.lesson_id).first();
-        delete quiz.answer;
-        success(res, quiz, response.QUIZ_FETCHED)
+        const lessonId = req.params.lesson_id || req.params.id;
+        const quizzes = await db('quiz').where('lesson_id', lessonId).select('*');
+        const sanitized = quizzes.map(q => {
+            const { answer, ...rest } = q;
+            return rest;
+        });
+        success(res, sanitized, response.QUIZ_FETCHED)
     } catch (err) {
         console.error(err);
         error(res, response.ISE, 500)

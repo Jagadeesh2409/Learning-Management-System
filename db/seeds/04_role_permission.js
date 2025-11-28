@@ -34,16 +34,6 @@ exports.seed = async function (knex) {
     { role_id: 3, permission_id: 22, value: true },
     { role_id: 3, permission_id: 23, value: true },
     { role_id: 3, permission_id: 24, value: true },
-
-    { role_id: 2, permission_id: 21, value: true },
-    { role_id: 2, permission_id: 22, value: true },
-    { role_id: 2, permission_id: 23, value: true },
-    { role_id: 2, permission_id: 24, value: true },
-
-    { role_id: 2, permission_id: 21, value: true },
-    { role_id: 2, permission_id: 22, value: true },
-    { role_id: 2, permission_id: 23, value: true },
-    { role_id: 2, permission_id: 24, value: true },
   ]);
 };
 
