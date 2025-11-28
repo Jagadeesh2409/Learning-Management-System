@@ -65,12 +65,14 @@
             ]
         };
 
+
         async function startLocal() {
             if (!localStream) {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 localVideo.srcObject = localStream;
             }
         }
+
 
         joinBtn.onclick = async () => {
             await startLocal();
@@ -83,6 +85,7 @@
             joinBtn.disabled = true;
             leaveBtn.disabled = false;
         };
+
 
         leaveBtn.onclick = () => {
             socket.emit('leave-room');
@@ -98,6 +101,7 @@
             leaveBtn.disabled = true;
         };
 
+
         function addRemoteEl(id) {
             if (remoteEls[id]) return;
             const container = document.createElement('div');
@@ -109,6 +113,7 @@
             participantsDiv.appendChild(container);
             remoteEls[id] = { container, video: v };
         }
+
 
         function removeRemote(id) {
             const r = remoteEls[id];
@@ -123,7 +128,7 @@
             pcs[remoteId] = pc;
 
             pc.ontrack = (ev) => {
-                addRemoteEl(remoteId);
+                addRemoteEl(remoteId);                                                                                                                  
                 remoteEls[remoteId].video.srcObject = ev.streams[0];
             };
 
@@ -133,12 +138,14 @@
                 }
             };
 
+
             pc.onconnectionstatechange = () => {
                 if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
                     pc.close(); delete pcs[remoteId]; removeRemote(remoteId);
                 }
             };
 
+            
             // if I have a local stream (teacher), add tracks
             if (localStream) {
                 for (const track of localStream.getTracks()) {
