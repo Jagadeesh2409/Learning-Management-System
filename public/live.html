@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>LMS Live Class Demo</title>
+    <style>
+        body {
+            font-family: system-ui, Arial;
+            margin: 12px
+        }
+
+        video {
+            width: 45%;
+            border: 1px solid #ddd;
+            margin: 6px
+        }
+
+        #participants {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+    </style>
+</head>
+
+<body>
+    <h2>LMS WebRTC Demo (Teacher/Student)</h2>
+
+    <label>Room: <input id="room" value="classroom1" /></label>
+    <label>Role:
+        <select id="role">
+            <option value="teacher">Teacher</option>
+            <option value="student">Student</option>
+        </select>
+    </label>
+    <button id="join">Join</button>
+    <button id="leave" disabled>Leave</button>
+
+    <h3>Local</h3>
+    <video id="local" autoplay muted playsinline></video>
+    <h3>Remote</h3>
+    <div id="participants"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const joinBtn = document.getElementById('join');
+        const leaveBtn = document.getElementById('leave');
+        const roomInput = document.getElementById('room');
+        const roleSelect = document.getElementById('role');
+        const localVideo = document.getElementById('local');
+        const participantsDiv = document.getElementById('participants');
+
+        let localStream = null;
+        const pcs = {}; // peer connections keyed by remote socket id
+        const remoteEls = {};
+
+        // STUN/TURN config — add TURN in production
+        const ICE_CONFIG = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'turn:turn.l.google.com:19302', username: 'jaga:don', credential: 'jaga@123' },
+                // add TURN here for production
+            ]
+        };
+
+        async function startLocal() {
+            if (!localStream) {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+            }
+        }
+
+        joinBtn.onclick = async () => {
+            await startLocal();
+            const roomId = roomInput.value.trim();
+            const role = roleSelect.value;
+            if (!roomId) return alert('Enter room');
+
+            socket.emit('join-room', { roomId, role });
+
+            joinBtn.disabled = true;
+            leaveBtn.disabled = false;
+        };
+
+        leaveBtn.onclick = () => {
+            socket.emit('leave-room');
+            for (const id of Object.keys(pcs)) {
+                pcs[id].close(); delete pcs[id];
+                removeRemote(id);
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null; localVideo.srcObject = null;
+            }
+            joinBtn.disabled = false;
+            leaveBtn.disabled = true;
+        };
+
+        function addRemoteEl(id) {
+            if (remoteEls[id]) return;
+            const container = document.createElement('div');
+            container.id = 'remote-' + id;
+            const title = document.createElement('div'); title.innerText = id;
+            const v = document.createElement('video');
+            v.autoplay = true; v.playsInline = true; v.width = 320; v.height = 180;
+            container.appendChild(title); container.appendChild(v);
+            participantsDiv.appendChild(container);
+            remoteEls[id] = { container, video: v };
+        }
+
+        function removeRemote(id) {
+            const r = remoteEls[id];
+            if (!r) return;
+            r.container.remove();
+            delete remoteEls[id];
+        }
+
+        function createPC(remoteId, isTeacherInitiator) {
+            if (pcs[remoteId]) return pcs[remoteId];
+            const pc = new RTCPeerConnection(ICE_CONFIG);
+            pcs[remoteId] = pc;
+
+            pc.ontrack = (ev) => {
+                addRemoteEl(remoteId);
+                remoteEls[remoteId].video.srcObject = ev.streams[0];
+            };
+
+            pc.onicecandidate = (ev) => {
+                if (ev.candidate) {
+                    socket.emit('signal', { to: remoteId, from: socket.id, type: 'ice', payload: ev.candidate });
+                }
+            };
+
+            pc.onconnectionstatechange = () => {
+                if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
+                    pc.close(); delete pcs[remoteId]; removeRemote(remoteId);
+                }
+            };
+
+            // if I have a local stream (teacher), add tracks
+            if (localStream) {
+                for (const track of localStream.getTracks()) {
+                    pc.addTrack(track, localStream);
+                }
+            }
+
+            return pc;
+        }
+
+        // Signaling handler
+        socket.on('signal', async (data) => {
+            const { from, type, payload } = data;
+            // console.log('signal', data);
+            if (type === 'offer') {
+                // student receives offer
+                const pc = createPC(from, false);
+                await pc.setRemoteDescription(new RTCSessionDescription(payload));
+                // student: answer back
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                socket.emit('signal', { to: from, from: socket.id, type: 'answer', payload: answer });
+            } else if (type === 'answer') {
+                const pc = createPC(from, false);
+                await pc.setRemoteDescription(new RTCSessionDescription(payload));
+            } else if (type === 'ice') {
+                const pc = createPC(from, false);
+                try { await pc.addIceCandidate(new RTCIceCandidate(payload)); } catch (e) { console.warn('ice add err', e); }
+            } else if (type === 'ready') {
+                // teacher receives readiness from student; teacher creates offer to that student
+                if (roleSelect.value === 'teacher') {
+                    const pc = createPC(from, true);
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    socket.emit('signal', { to: from, from: socket.id, type: 'offer', payload: offer });
+                }
+            }
+        });
+
+        // when participant joins; teacher may proactively create offer
+        socket.on('participant-joined', ({ id, role }) => {
+            // if I'm teacher and new participant is student -> create offer
+            if (roleSelect.value === 'teacher' && role === 'student') {
+                (async () => {
+                    const pc = createPC(id, true);
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    socket.emit('signal', { to: id, from: socket.id, type: 'offer', payload: offer });
+                })();
+            }
+        });
+
+        // teacher available notification (student) -> student can send 'ready'
+        socket.on('teacher-available', ({ teacherId }) => {
+            if (roleSelect.value === 'student') {
+                // student notify teacher ready
+                socket.emit('signal', { to: teacherId, from: socket.id, type: 'ready', payload: {} });
+                console.log('teacher available', teacherId);
+                console.log('student ready', socket.id);
+            }
+        });
+
+        socket.on('participant-left', ({ id }) => {
+            if (pcs[id]) { try { pcs[id].close(); } catch (e) { } delete pcs[id]; }
+            removeRemote(id);
+        });
+
+        // basic connect log
+        socket.on('connect', () => console.log('connected', socket.id));
+
+        socket.on("existing-participants", (list) => {
+            list.forEach(p => {
+                createPC(p.id);
+                createOfferFor(p.id);
+            });
+        });
+
+        socket.on("participant-joined", ({ id }) => {
+            createPC(id);
+            createOfferFor(id);
+        });
+    </script>
+</body>
+
+</html>

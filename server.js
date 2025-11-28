@@ -1,11 +1,17 @@
 const express = require('express')
 const http = require('http')
-const socketIo = require('socket.io')
+const { Server } = require('socket.io')
 const app = express()
 const server = http.createServer(app)
-const io = new socketIo.Server(server)
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 const PORT = process.env.PORT || 3000
 const errorHandler = require('./utils/errorHandler')
+const path = require('path')
 
 const authRoute = require('./routes/authRoute')
 const studentRoute = require('./routes/studentRoute')
@@ -23,10 +29,10 @@ const liveClassRoute = require('./live-class/routes')
 const assignmentRoute = require('./routes/assignmentRoute')
 
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 require('./socket/index')(io)
 
-const cors = require('cors')
-app.use(cors())
 app.use(express.json())
 
 

@@ -5,7 +5,8 @@ const { checkEntroll } = require('../controllers/entrollController');
 const { getLesson, getSingleLesson } = require('../controllers/lessonController');
 const { getCourse } = require('../controllers/courseController')
 const { getQuiz } = require('../controllers/quizController')
-const { getMark, getQuiz, takeQuiz } = require('../controllers/takeQuiz')
+const { getMark, takeQuiz } = require('../controllers/takeQuiz')
+
 
 router.get('/course/:id', authMiddleware, roleMiddleware('student-entroll'), checkEntroll, getCourse);
 router.get('/lesson/:id', authMiddleware, roleMiddleware('student-entroll'), checkEntroll, getLesson);
